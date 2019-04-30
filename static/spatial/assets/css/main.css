@@ -2019,7 +2019,7 @@
 		.feature-grid .feature {
 			display: inline-block;
 			float: left;
-			margin-bottom: 3em;
+			margin-bottom: 0;
 			width: 100%;
 		}
 
@@ -2037,8 +2037,8 @@
 				}
 
 			.feature-grid .feature:nth-child(odd) .content, .feature-grid .feature:nth-child(odd) .image {
-				float: right;
-				margin-right: 5%;
+				float: left;
+				margin-left: 5%;
 				/*text-align: right;*/ /*TEST*/
 			}
 
@@ -2615,7 +2615,7 @@
 	}
 
 	header.major {
-		margin: 0 0 6em 0;
+		margin: 0 0 0 0;
 	}
 
 		header.major h2 {

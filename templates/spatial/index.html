@@ -48,9 +48,6 @@
 				<div class="feature-grid">
 					{%for result in results%}
 					<div class="feature">
-						<div class="image rounded">
-							<img style="{%if not result.thumbnail%}visibility:hidden{%endif%}" src="{{result.thumbnail}}" alt="" />
-						</div>
 						<div class="content">
 							<header>
 								<h4><a href="{{result.url}}">{{result.title|safe|truncate_title}}</a></h4>
