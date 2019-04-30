@@ -2,11 +2,12 @@ from whoosh import index
 from whoosh.qparser import QueryParser
 from whoosh.qparser.dateparse import DateParserPlugin
 
+from config import config
 
 class Query(object):
 
     def __init__(self):
-        self.ix = index.open_dir("../news-crawler/news/index_files")
+        self.ix = index.open_dir(config.index_file_path)
 
         # Instatiate a query parser
         self.qp = QueryParser("content", self.ix.schema)
