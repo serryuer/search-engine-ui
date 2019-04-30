@@ -1,60 +1,20 @@
-# web-search-engine-ui
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Python 3.5](https://img.shields.io/badge/python-3.5-blue.svg)
+# search-engine-ui
+基于 [https://github.com/AnthonySigogne/web-search-engine](https://github.com/AnthonySigogne/web-search-engine)修改
 
-UI of the simple web search engine https://github.com/AnthonySigogne/web-search-engine
+一个简单的搜索引擎界面，基于whoosh全文检索，使用之前需要自行建立索引，可以参考[https://github.com/serryuer/news-crawler-python.git](https://github.com/serryuer/news-crawler-python.git)，爬去新闻并建立索引
 
-## DEMO
-A demo can be found here : http://searchengine.byprog.com/  
+## 环境
 
-About 500 French URLs and 500 English URLs of the news network http://www.france24.com/ have been indexed.
+**Python3.6/Ubuntu18**
 
-## INSTALL AND RUN
-
-### REQUIREMENTS
-This tool requires *Python3+* and the web search engine API (see link above).
-
-### WITH PIP
+- 安装依赖
 ```
-git clone https://github.com/AnthonySigogne/web-search-engine-ui.git
-cd web-search-engine-ui
-pip install -r requirements.txt
+conda install --yes --file requirements.txt
 ```
 
-Then, run the tool :
-```
-FLASK_APP=index.py HOST=<ip> PORT=<port> flask run --port 80
-```
-Where :
-* `ip` + `port` : route to web search engine API
 
-To run in debug mode, prepend `FLASK_DEBUG=1` to the command :
-```
-FLASK_DEBUG=1 ... flask run --port 80
-```
+## 运行
 
-### WITH DOCKER
-To run the tool with Docker, you can use my DockerHub image :
-https://hub.docker.com/r/anthonysigogne/web-search-engine-ui/
 ```
-docker run -p 80:5000 \
--e "HOST=<ip>" \
--e "PORT=<port>" \
-anthonysigogne/web-search-engine-ui
+./start.sh
 ```
-Where :
-* `ip` + `port` : route to web search engine API
-
-Or, build yourself a Docker image :
-```
-git clone https://github.com/AnthonySigogne/web-search-engine-ui.git
-cd web-search-engine-ui
-docker build -t web-search-engine-ui .
-```
-
-## USAGE AND EXAMPLES
-To use the search engine, just type this endpoint in your web browser : http://localhost/
-
-![Web search engine](images/search-engine.png?raw=true "Search Engine" )
-
-## LICENCE
-MIT
