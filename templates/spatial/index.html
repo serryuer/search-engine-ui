@@ -61,7 +61,7 @@
                 <form action="/" method="GET" name="search" role="search">
                     <header class="major special">
                         <input name="query" id="query" type="text" style="display:none" value="{{query}}"></input>
-                        <h2 id="queryeditable" contenteditable="true">{{query}} <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <h2 id="queryeditable" style="font-size:larger" contenteditable="true">{{query}} <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 							<path
 								d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
 							</path>
@@ -70,7 +70,7 @@
                             <p style="font-family: auto; font-size: medium;display: inline-block;float: left;">
                                 About {{total}} results ({{response_time}} seconds)
                             </p>
-                            <div class="sort_form" style="width: 46%;display: inline-block;float: right;">
+                            <div class="sort_form" style="width: 46%;display: inline-block;float: right;  {%if similar%}visibility: hidden;{%endif%}">
                                 <form id="sort_type" action="/?query={{query}}&sort=" method="get">
                                     <input name="sort" onchange="this.form.submit();" type="radio" value="1" style="opacity: 1; margin-right: 0.5em;" {%if sort_type==1 %}checked=true {%endif%} />相关性
                                     <input name="sort" onchange="this.form.submit();" type="radio" value="2" style="opacity: 1; margin-right: 0.5em;" {%if sort_type==2 %}checked=true {%endif%}/>热度
@@ -86,20 +86,20 @@
                         {%for result in results%}
                         <div class="feature">
                             <div class="content">
-                                <a color="rgb(100,100,100)" target="_blank" href="{{result.url}}" font-size="large">{{result.title|safe}}</a>
+                                <a color="rgb(100,100,100)" target="_blank" href="{{result['url']}}" font-size="large">{{result.title|safe}}</a>
                                 <div class="newsinfo ">
                                     <div class="left-source ">
-                                        <p style="margin-bottom: 1em"> {{result.source}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{result.publish_time}}</p>
+                                        <p style="margin-bottom: 1em"> {{result["source"]}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{result.publish_time}}</p>
                                     </div>
-                                    <div class="right-similar "><a href="# ">相似新闻</a></div>
+                                    <div class="right-similar "><a href="/?query={{result.title}}&similar=true&url={{result.url}}">相似新闻</a></div>
                                 </div>
-                                <p>{{result.description|safe}}</p>
+                                <p style="font-family: monospace">{{result.description|safe}}</p>
                             </div>
                         </div>
                         {%endfor%}
                     </div>
 
-                    <div class="recom_search">
+                    <div class="recom_search" style="  {%if similar%}visibility: hidden;{%endif%}">
                         <span>相关搜索</span>
                         <ul>
                             {%for query in recommends%}

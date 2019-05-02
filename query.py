@@ -6,6 +6,11 @@ from whoosh.sorting import FieldFacet
 
 from config import config
 
+from whoosh.classify import Bo1Model
+
+from whoosh.searching import Results
+from whoosh.searching import ResultsPage
+
 
 class Query(object):
 
@@ -17,6 +22,27 @@ class Query(object):
 
         # Add the DateParserPlugin to the parser
         self.qp.add_plugin(DateParserPlugin())
+
+    def _results_todata(self, results):
+            data = {}
+            if isinstance(results, Results):
+                data["total"] = results.estimated_length()
+            elif isinstance(results, ResultsPage):
+                data['total'] = results.total
+            result_list = []
+            for result in results:
+                item = {}
+                for key in result.keys():
+                    item[key] = result.get(key)
+                import re
+                match_class = re.compile('class="match term[0-9]"')
+                item['description'] = match_class.sub(" ", str(result.highlights('content')))\
+                    .replace(" ", "").replace("\r\n", "").replace("\n", "")
+                item['description'] = self.truncate_description(
+                    item['description'])
+                result_list.append(item)
+            data["results"] = result_list
+            return data
 
     def query_page(self, term, page_num, page_len, sort_type):
 
@@ -32,22 +58,8 @@ class Query(object):
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            data = {}
-            data["total"] = results.total
-            result_list = []
-            for result in results:
-                item = {}
-                for key in result.keys():
-                    item[key] = result.get(key)
-                import re
-                match_class = re.compile('class="match term[0-9]"')
-                item['description'] = match_class.sub(" ", str(result.highlights('content')))\
-                    .replace(" ", "").replace("\r\n", "").replace("\n", "")
-                item['description'] = self.truncate_description(
-                    item['description'])
-                result_list.append(item)
-            data["results"] = result_list
-            return data
+            
+            return self._results_todata(results)
 
     def truncate_description(self, description):
         """
@@ -70,22 +82,7 @@ class Query(object):
     def recommend_news(self):
         with self.ix.searcher() as searcher:
             results = searcher.search(self.qp.parse(u"推荐"), limit=None)
-            data = {}
-            data["total"] = len(results)
-            result_list = []
-            for result in results:
-                item = {}
-                for key in result.keys():
-                    item[key] = result.get(key)
-                import re
-                match_class = re.compile('class="match term[0-9]"')
-                item['description'] = match_class.sub(" ", str(result.highlights('content')))\
-                    .replace(" ", "").replace("\r\n", "").replace("\n", "")
-                item['description'] = self.truncate_description(
-                    item['description'])
-                result_list.append(item)
-            data["results"] = result_list
-            return data
+            return self._results_todata(results)
 
     def get_recommend_query(self, term):
         recom_query = []
@@ -98,8 +95,22 @@ class Query(object):
                 recom_query.append(item)
         return recom_query
 
+    def search_more_like_this(self, url, fieldname, top):
+        with self.ix.searcher() as searcher:
+            docnum = searcher.document_number(url=url)
+            results = searcher.more_like(docnum, fieldname, text=None,
+                                top=top, numterms=5, model=Bo1Model,
+                                normalize=True, filter=None)
+
+            return self._results_todata(results)
+
+
 
 if __name__ == '__main__':
     query = Query()
     # print(query.query("测试", 1, 10))
-    print(query.query_page(u"测试", 1, 10, 1))
+    # print(query.query_page(u"测试", 1, 10, 1))
+
+    # query.query_page("测试",1,10, 1)
+    query.recommend_news()
+    # query.get_recommend_query("测试")

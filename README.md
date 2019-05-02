@@ -12,12 +12,13 @@
 分页功能 | 于军帅
 搜索界面底部（或者右部）显示相关搜索 | 于军帅
 界面添加按照时间\热度排序选择框| 于军帅
+按照时间排序（读API就可以，尽量不要进行二次搜索） | 于军帅
+相似新闻（有类似api） | 于军帅
 新闻摘要生成（还不知道怎么从whoosh的索引中得到tfidf数据） | ×
 排序函数的重写（Whoosh的默认排序是基于一个字段的BM25F分数，<br>我们想要根据标题和内容的综合检索得分得到排序结果，应该是需要<br>重写whoosh的某些API） | ×
-按照时间排序（读API就可以，尽量不要进行二次搜索） | 
 热点新闻（类似于上面的需求，但是要求在所有文档上进行热度排序，<br>不知道有没有类似的API，还可以在给文章建立索引的同时计算它的热度值） | *
 相关搜索（whoosh有类似api） | *
-相似新闻（有类似api） | *
+通配符索引好像还有点问题 | *
 
 # search-engine-ui
 基于 [https://github.com/AnthonySigogne/web-search-engine](https://github.com/AnthonySigogne/web-search-engine)修改
