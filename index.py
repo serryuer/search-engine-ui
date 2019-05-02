@@ -41,10 +41,8 @@ def search():
 
     if similar:
         url = request.args.get("url", 1, type=str)
-        print("find similar news for : ", url)
         data = query_engine.search_more_like_this(
             url=url, fieldname="content", top=10)
-        print(data)
         range_pages = [1]
 
         # show the list of matching results

@@ -11,6 +11,9 @@ from whoosh.classify import Bo1Model
 from whoosh.searching import Results
 from whoosh.searching import ResultsPage
 
+from whoosh.qparser import WildcardPlugin, PrefixPlugin, RegexPlugin
+
+
 
 class Query(object):
 
@@ -22,6 +25,9 @@ class Query(object):
 
         # Add the DateParserPlugin to the parser
         self.qp.add_plugin(DateParserPlugin())
+        self.qp.add_plugin(WildcardPlugin())
+        self.qp.add_plugin(PrefixPlugin())
+        self.qp.add_plugin(RegexPlugin())
 
     def _results_todata(self, results):
             data = {}

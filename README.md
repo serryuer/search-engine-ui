@@ -39,13 +39,16 @@ class Config(object):
 
 - 安装依赖
 ```
-conda install --yes --file requirements.txt
+pip install -r requirements.txt
 ```
-
 
 ## 运行
 
 ```
 ./start.sh
 ```
+<center>
+<img src="https://github.com/serryuer/search-engine-ui/raw/master/images/home.png" width=100% height=100%/>"
+<center>
+<img src="https://github.com/serryuer/search-engine-ui/raw/master/images/search.png" width=100% height=100%/>"
 
