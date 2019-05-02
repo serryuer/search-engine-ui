@@ -31,36 +31,32 @@ def search():
     Return a template view with the list of relevant URLs.
     """
     # GET data
-    query = request.args.get("query", None)
-    start = request.args.get("start", 0, type=int)
-    hits = request.args.get("hits", 10, type=int)
-    if start < 0 or hits < 0:
+    query_term = request.args.get("query", None)
+    page_num = request.args.get("page_num", 1, type=int)
+    page_len = request.args.get("page_len", 10, type=int)
+    if page_num < 0 or page_len < 0:
         return "Error, start or hits cannot be negative numbers"
 
-    if query:
+    if query_term:
         # query search engine
-        try:
-            data = query_engine.query(query)
-        except:
-            return "Error, check your installation"
 
-        i = int(start/hits)
-        maxi = 1+int(data["total"]/hits)
-        range_pages = range(
-            i-5, i+5 if i+5 < maxi else maxi) if i >= 6 else range(0, maxi if maxi < 10 else 10)
+        data = query_engine.query_page(query_term, page_num, page_len)
+
+        i = page_num
+        maxi = 1+int(data["total"]/page_len)
+        range_pages = range(i-5, i+5 if i+5 < maxi else maxi) if i >= 6 else range(1, maxi+1 if maxi < 10 else 10)
 
         # show the list of matching results
-        return render_template('spatial/index.html', query=query,
+        return render_template('spatial/index.html', query=query_term,
                                # response_time=r.elapsed.total_seconds(),
                                response_time=0.1,
                                total=data["total"],
-                               hits=hits,
-                               start=start,
+                               page_len=page_len,
+                               page_num=page_num,
                                range_pages=range_pages,
                                results=data["results"],
-                               page=i,
-                               maxpage=maxi-1)
-    else:
+                               maxpage=maxi)
+    else:# retrun home page with hot news
         try:
             data = query_engine.recommend_news()
         except:
@@ -71,9 +67,6 @@ def search():
                                # response_time=r.elapsed.total_seconds(),
                                results=data["results"],
                                )
-
-    # return homepage (no query)
-    # return render_template('spatial/index.html')
 
 
 @app.route("/reference", methods=['POST'])

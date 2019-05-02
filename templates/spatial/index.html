@@ -91,15 +91,15 @@
 
             <ul class="pagination ">
                 <li class="pagination-item--wide first ">
-                    <a class="pagination-link--wide first {%if page==0%}disabled{%endif%} " href="/?query={{query}}&start={{(page-1)*hits}}&hits={{hits}} ">Previous</a>
+                    <a class="pagination-link--wide first {%if page_num==1%}disabled{%endif%} " href="/?query={{query}}&page_num={{page_num-1}} ">Previous</a>
                 </li>
                 {% for i in range_pages %}
-                <li class="pagination-item {%if page==i %}is-active{%endif%} {%if loop.index0==0 %}first-number{%endif%} ">
-                    <a class="pagination-link " href="/?query={{query}}&start={{i*hits}}&hits={{hits}} ">{{i+1}}</a>
+                <li class="pagination-item {%if page_num==i %}is-active{%endif%} {%if loop.index0==0 %}first-number{%endif%} ">
+                    <a class="pagination-link " href="/?query={{query}}&page_num={{i}}&page_len={{page_len}}">{{i}}</a>
                 </li>
                 {% endfor %}
                 <li class="pagination-item--wide last ">
-                    <a class="pagination-link--wide last {%if page==maxpage%}disabled{%endif%} " href="/?query={{query}}&start={{(page+1)*hits}}&hits={{hits}} ">Next</a>
+                    <a class="pagination-link--wide last {%if page_num==maxpage%}disabled{%endif%} " href="/?query={{query}}&page_num={{page_num + 1}}">Next</a>
                 </li>
             </ul>
 
@@ -168,7 +168,7 @@
     <script src="static/spatial/assets/js/skel.min.js "></script>
     <script src="static/spatial/assets/js/util.js "></script>
     <script src="static/spatial/assets/js/main.js "></script>
-    <script src="static/spatial/assets/js/paginate.js "></script>
+    <!-- <script src="static/spatial/assets/js/paginate.js "></script> -->
 
 </body>
 

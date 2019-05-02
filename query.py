@@ -15,11 +15,11 @@ class Query(object):
         # Add the DateParserPlugin to the parser
         self.qp.add_plugin(DateParserPlugin())
 
-    def query(self, term):
+    def query_page(self, term, page_num, page_len):
         with self.ix.searcher() as searcher:
-            results = searcher.search(self.qp.parse(term), limit=None)
+            results = searcher.search_page(self.qp.parse(term), pagenum = page_num, pagelen = page_len)
             data = {}
-            data["total"] = len(results)
+            data["total"] = results.total
             result_list = []
             for result in results:
                 item = {}
@@ -72,4 +72,4 @@ class Query(object):
             
 if __name__ == '__main__':
     query = Query()
-    print(query.recommend_news())
+    print(query.query("测试", 1, 10))
