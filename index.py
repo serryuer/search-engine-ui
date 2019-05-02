@@ -40,21 +40,10 @@ def search():
     if query:
         # query search engine
         try:
-            # r = requests.post('http://%s:%s/search'%(host, port), data = {
-            #     'query':query,
-            #     'hits':hits,
-            #     'start':start
-            # })
-            # data = json.loads(s='{"total": 1,"results": [{"title": "Anthony Sigogne / Freelance / Full-Stack Developer",\
-            #     "description": "Full-Stack Developer specialized in new technologies and innovative IT solutions.",\
-            #         "url": "https://www.byprog.com/en/"}]}')
             data = query_engine.query(query)
         except:
             return "Error, check your installation"
 
-        # get data and compute range of results pages
-        # data = r.json()
-        # data
         i = int(start/hits)
         maxi = 1+int(data["total"]/hits)
         range_pages = range(
@@ -104,52 +93,3 @@ def reference():
     return "Votre demande a bien été prise en compte et sera traitée dans les meilleurs délais."
 
 # -- JINJA CUSTOM FILTERS -- #
-
-
-@app.template_filter('truncate_title')
-def truncate_title(title):
-    """
-    Truncate title to fit in result format.
-    """
-    return title if len(title) <= 70 else title[:70]+"..."
-
-
-@app.template_filter('truncate_description')
-def truncate_description(description):
-    """
-    Truncate description to fit in result format.
-    """
-    if len(description) <= 160:
-        return description
-
-    cut_desc = ""
-    tag_position = 0
-    ready_to_end = False
-    for i, letter in enumerate(description):
-        if i == 160:
-            ready_to_end = True
-        if ready_to_end and tag_position == 0:
-            break
-        if letter == '<' and tag_position == 0:
-            tag_position = 1
-        if letter == '>' and tag_position == 1:
-            tag_position = 2
-        if letter == '>' and tag_position == 2:
-            tag_position = 0
-        cut_desc += letter
-    cut_desc.replace
-    print(cut_desc)
-    return cut_desc
-
-@app.template_filter('truncate_url')
-def truncate_url(url):
-    """
-    Truncate url to fit in result format.
-    """
-    url = parse.unquote(url)
-    if len(url) <= 60:
-        return url
-    url = url[:-1] if url.endswith("/") else url
-    url = url.split("//", 1)[1].split("/")
-    url = "%s/.../%s" % (url[0], url[-1])
-    return url[:60]+"..." if len(url) > 60 else url

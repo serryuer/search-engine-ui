@@ -25,15 +25,32 @@ class Query(object):
                 item = {}
                 for key in result.keys():
                     item[key] = result.get(key)
-                    import re
-                    match_class = re.compile('class="match term[0-9]"')
-                    item['description'] = match_class.sub(" ",str(result.highlights('content')))\
-                        .replace(" ", "").replace("\r\n", "").replace("\n", "")
+                import re
+                match_class = re.compile('class="match term[0-9]"')
+                item['description'] = match_class.sub(" ",str(result.highlights('content')))\
+                    .replace(" ", "").replace("\r\n", "").replace("\n", "")
+                item['description'] = self.truncate_description(item['description'])
                 result_list.append(item)
             data["results"] = result_list
             return data
 
+    def truncate_description(self, description):
+        """
+        Truncate description to fit in result format.
+        """
+        if len(description) <= 160:
+            return description
+        cut_desc = description[:160]
+        i = 160
+        letter = description[i]
+        while not (letter == ',' or letter == '，' or letter == '.' or letter == '。'): 
+            cut_desc += letter
+            i = i + 1
+            letter = description[i]
+        cut_desc += letter
+        # print(cut_desc)
+        return cut_desc
 
 if __name__ == '__main__':
     query = Query()
-    print(query.query(u'中国'))
+    query.query(u'运动')

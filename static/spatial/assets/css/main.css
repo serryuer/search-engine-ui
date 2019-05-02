@@ -2004,6 +2004,15 @@
 
 		}
 
+		.left-source, .right-similar{
+			display:inline-block
+		}
+
+		.newsinfo .right-similar{
+			float:right
+		}
+
+
 /* Feature */
 
 	.feature-grid {
