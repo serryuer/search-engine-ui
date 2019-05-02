@@ -57,66 +57,78 @@
             <a href="/"><img src="static/spatial/images/caledonie.jpg" alt="" style="width:100px;height:100px" /></a>
         </div>
         <div class="container">
-            <form action="/" method="GET" name="search" role="search">
-                <header class="major special">
-                    <input name="query" id="query" type="text" style="display:none" value="{{query}}"></input>
-                    <h2 id="queryeditable" contenteditable="true">{{query}} <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <div>
+                <form action="/" method="GET" name="search" role="search">
+                    <header class="major special">
+                        <input name="query" id="query" type="text" style="display:none" value="{{query}}"></input>
+                        <h2 id="queryeditable" contenteditable="true">{{query}} <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 							<path
 								d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
 							</path>
-						</svg></h2>
-                    <p style="font-family: auto; font-size: small">About {{total}} results ({{response_time}} seconds)</p>
-                </header>
-            </form>
-
-            <div>
-                <div class="feature-grid" style="display: inline-block; width: 70%;">
-                    {%for result in results%}
-                    <div class="feature">
-                        <div class="content">
-                            <a color="rgb(100,100,100)" target="_blank" href="{{result.url}}" font-size="large">{{result.title|safe}}</a>
-                            <div class="newsinfo ">
-                                <div class="left-source ">
-                                    <p style="margin-bottom: 1em"> {{result.source}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{result.publish_time}}</p>
-                                </div>
-                                <div class="right-similar "><a href="# ">相似新闻</a></div>
+                        </svg></h2>
+                        <div>
+                            <p style="font-family: auto; font-size: medium;display: inline-block;float: left;">
+                                About {{total}} results ({{response_time}} seconds)
+                            </p>
+                            <div class="sort_form" style="width: 46%;display: inline-block;float: right;">
+                                <form id="sort_type" action="/?query={{query}}&sort=" method="get">
+                                    <input name="sort" onchange="this.form.submit();" type="radio" value="1" style="opacity: 1; margin-right: 0.5em;" {%if sort_type==1 %}checked=true {%endif%} />相关性
+                                    <input name="sort" onchange="this.form.submit();" type="radio" value="2" style="opacity: 1; margin-right: 0.5em;" {%if sort_type==2 %}checked=true {%endif%}/>热度
+                                    <input name="sort" onchange="this.form.submit();" type="radio" value="3" style="opacity: 1; margin-right: 0.5em;" {%if sort_type==3 %}checked=true {%endif%}/>时间
+                                </form>
                             </div>
-                            <p>{{result.description|safe}}</p>
                         </div>
-                    </div>
-                    {%endfor%}
-                </div>
+                    </header>
+                </form>
 
-                <div class="recom_search">
-                    <span>相关搜索</span>
-                    <ul>
-                        {%for query in recommends%}
-                        <li>
-                            <a href=" /?query={{query.term}} ">{{query.term}}</a>
-                        </li>
+                <div>
+                    <div class="feature-grid" style="display: inline-block; width: 70%;">
+                        {%for result in results%}
+                        <div class="feature">
+                            <div class="content">
+                                <a color="rgb(100,100,100)" target="_blank" href="{{result.url}}" font-size="large">{{result.title|safe}}</a>
+                                <div class="newsinfo ">
+                                    <div class="left-source ">
+                                        <p style="margin-bottom: 1em"> {{result.source}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{result.publish_time}}</p>
+                                    </div>
+                                    <div class="right-similar "><a href="# ">相似新闻</a></div>
+                                </div>
+                                <p>{{result.description|safe}}</p>
+                            </div>
+                        </div>
                         {%endfor%}
-                    </ul>
+                    </div>
+
+                    <div class="recom_search">
+                        <span>相关搜索</span>
+                        <ul>
+                            {%for query in recommends%}
+                            <li>
+                                <a href=" /?query={{query.term}} ">{{query.term}}</a>
+                            </li>
+                            {%endfor%}
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="pagination-container wow zoomIn mar-b-1x " data-wow-duration="0.5s ">
+            <div class="pagination-container wow zoomIn mar-b-1x " data-wow-duration="0.5s ">
 
-            <ul class="pagination ">
-                <li class="pagination-item--wide first ">
-                    <a class="pagination-link--wide first {%if page_num==1%}disabled{%endif%} " href="/?query={{query}}&page_num={{page_num-1}} ">Previous</a>
-                </li>
-                {% for i in range_pages %}
-                <li class="pagination-item {%if page_num==i %}is-active{%endif%} {%if loop.index0==0 %}first-number{%endif%} ">
-                    <a class="pagination-link " href="/?query={{query}}&page_num={{i}}&page_len={{page_len}} ">{{i}}</a>
-                </li>
-                {% endfor %}
-                <li class="pagination-item--wide last ">
-                    <a class="pagination-link--wide last {%if page_num==maxpage%}disabled{%endif%} " href="/?query={{query}}&page_num={{page_num + 1}} ">Next</a>
-                </li>
-            </ul>
+                <ul class="pagination ">
+                    <li class="pagination-item--wide first ">
+                        <a class="pagination-link--wide first {%if page_num==1%}disabled{%endif%} " href="/?query={{query}}&page_num={{page_num-1}} ">Previous</a>
+                    </li>
+                    {% for i in range_pages %}
+                    <li class="pagination-item {%if page_num==i %}is-active{%endif%} {%if loop.index0==0 %}first-number{%endif%} ">
+                        <a class="pagination-link " href="/?query={{query}}&page_num={{i}}&page_len={{page_len}} ">{{i}}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="pagination-item--wide last ">
+                        <a class="pagination-link--wide last {%if page_num==maxpage%}disabled{%endif%} " href="/?query={{query}}&page_num={{page_num + 1}} ">Next</a>
+                    </li>
+                </ul>
 
-        </div>
+            </div>
 
     </section>
 

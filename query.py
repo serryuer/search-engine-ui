@@ -16,7 +16,7 @@ class Query(object):
         # Add the DateParserPlugin to the parser
         self.qp.add_plugin(DateParserPlugin())
 
-    def query_page(self, term, page_num, page_len):
+    def query_page(self, term, page_num, page_len, sort_type):
         with self.ix.searcher() as searcher:
             results = searcher.search_page(self.qp.parse(
                 term), pagenum=page_num, pagelen=page_len)

@@ -34,13 +34,14 @@ def search():
     query_term = request.args.get("query", None)
     page_num = request.args.get("page_num", 1, type=int)
     page_len = request.args.get("page_len", 10, type=int)
+    sort_type = request.args.get("sort", 1, type=int)
     if page_num < 0 or page_len < 0:
         return "Error, start or hits cannot be negative numbers"
 
     if query_term:
         # query search engine
 
-        data = query_engine.query_page(query_term, page_num, page_len)
+        data = query_engine.query_page(query_term, page_num, page_len, sort_type)
 
         recom_search = query_engine.get_recommend_query(query_term)
 
@@ -58,7 +59,8 @@ def search():
                                range_pages=range_pages,
                                results=data["results"],
                                maxpage=maxi,
-                               recommends=recom_search)
+                               recommends=recom_search,
+                               sort_type=sort_type)
     else:# retrun home page with hot news
         try:
             data = query_engine.recommend_news()
@@ -68,7 +70,7 @@ def search():
         # show the list of matching results
         return render_template('spatial/index.html',
                                # response_time=r.elapsed.total_seconds(),
-                               results=data["results"],
+                               results=data["results"]
                                )
 
 
