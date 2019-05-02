@@ -51,6 +51,25 @@ class Query(object):
         # print(cut_desc)
         return cut_desc
 
+    def recommend_news(self):
+        with self.ix.searcher() as searcher:
+            results = searcher.search(self.qp.parse(u"推荐"), limit=None)
+            data = {}
+            data["total"] = len(results)
+            result_list = []
+            for result in results:
+                item = {}
+                for key in result.keys():
+                    item[key] = result.get(key)
+                import re
+                match_class = re.compile('class="match term[0-9]"')
+                item['description'] = match_class.sub(" ",str(result.highlights('content')))\
+                    .replace(" ", "").replace("\r\n", "").replace("\n", "")
+                item['description'] = self.truncate_description(item['description'])
+                result_list.append(item)
+            data["results"] = result_list
+            return data
+            
 if __name__ == '__main__':
     query = Query()
-    query.query(u'运动')
+    print(query.recommend_news())

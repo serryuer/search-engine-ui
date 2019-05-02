@@ -60,9 +60,20 @@ def search():
                                results=data["results"],
                                page=i,
                                maxpage=maxi-1)
+    else:
+        try:
+            data = query_engine.recommend_news()
+        except:
+            return "Error, check your installation"
+
+        # show the list of matching results
+        return render_template('spatial/index.html',
+                               # response_time=r.elapsed.total_seconds(),
+                               results=data["results"],
+                               )
 
     # return homepage (no query)
-    return render_template('spatial/index.html')
+    # return render_template('spatial/index.html')
 
 
 @app.route("/reference", methods=['POST'])
