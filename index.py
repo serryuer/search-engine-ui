@@ -42,6 +42,8 @@ def search():
 
         data = query_engine.query_page(query_term, page_num, page_len)
 
+        recom_search = query_engine.get_recommend_query(query_term)
+
         i = page_num
         maxi = 1+int(data["total"]/page_len)
         range_pages = range(i-5, i+5 if i+5 < maxi else maxi) if i >= 6 else range(1, maxi+1 if maxi < 10 else 10)
@@ -55,7 +57,8 @@ def search():
                                page_num=page_num,
                                range_pages=range_pages,
                                results=data["results"],
-                               maxpage=maxi)
+                               maxpage=maxi,
+                               recommends=recom_search)
     else:# retrun home page with hot news
         try:
             data = query_engine.recommend_news()

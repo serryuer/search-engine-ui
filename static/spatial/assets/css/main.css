@@ -1967,11 +1967,18 @@ button.special:active,
     background-color: rgb(200, 200, 200)
 }
 
+.recom_search {
+    display: inline-block;
+    float: right;
+    width: 25%;
+}
+
 
 /* Feature */
 
 .feature-grid {
     position: relative;
+    width: 70%;
 }
 
 .feature-grid:after {
@@ -1988,11 +1995,12 @@ button.special:active,
 }
 
 .feature-grid .feature .content {
-    width: 70%;
+    width: 100%;
 }
 
-.feature-grid .feature .image {
-    width: 30%;
+.feature-grid {
+    display: inline-block;
+    width: 100%;
 }
 
 .feature-grid .feature .image img {
@@ -3223,3 +3231,5 @@ body.is-touch #banner {
         padding: 0;
     }
 }
+
+;

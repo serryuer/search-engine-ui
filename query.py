@@ -4,6 +4,7 @@ from whoosh.qparser.dateparse import DateParserPlugin
 
 from config import config
 
+
 class Query(object):
 
     def __init__(self):
@@ -17,7 +18,8 @@ class Query(object):
 
     def query_page(self, term, page_num, page_len):
         with self.ix.searcher() as searcher:
-            results = searcher.search_page(self.qp.parse(term), pagenum = page_num, pagelen = page_len)
+            results = searcher.search_page(self.qp.parse(
+                term), pagenum=page_num, pagelen=page_len)
             data = {}
             data["total"] = results.total
             result_list = []
@@ -27,9 +29,10 @@ class Query(object):
                     item[key] = result.get(key)
                 import re
                 match_class = re.compile('class="match term[0-9]"')
-                item['description'] = match_class.sub(" ",str(result.highlights('content')))\
+                item['description'] = match_class.sub(" ", str(result.highlights('content')))\
                     .replace(" ", "").replace("\r\n", "").replace("\n", "")
-                item['description'] = self.truncate_description(item['description'])
+                item['description'] = self.truncate_description(
+                    item['description'])
                 result_list.append(item)
             data["results"] = result_list
             return data
@@ -43,7 +46,7 @@ class Query(object):
         cut_desc = description[:160]
         i = 160
         letter = description[i]
-        while not (letter == ',' or letter == '，' or letter == '.' or letter == '。'): 
+        while not (letter == ',' or letter == '，' or letter == '.' or letter == '。'):
             cut_desc += letter
             i = i + 1
             letter = description[i]
@@ -63,13 +66,26 @@ class Query(object):
                     item[key] = result.get(key)
                 import re
                 match_class = re.compile('class="match term[0-9]"')
-                item['description'] = match_class.sub(" ",str(result.highlights('content')))\
+                item['description'] = match_class.sub(" ", str(result.highlights('content')))\
                     .replace(" ", "").replace("\r\n", "").replace("\n", "")
-                item['description'] = self.truncate_description(item['description'])
+                item['description'] = self.truncate_description(
+                    item['description'])
                 result_list.append(item)
             data["results"] = result_list
             return data
-            
+
+    def get_recommend_query(self, term):
+        recom_query = []
+        with self.ix.searcher() as searcher:
+            results = searcher.search_page(self.qp.parse(u"推荐"), pagenum=1, pagelen=10)
+            for result in results:
+                item = {}
+                item['term'] = result['title']
+                recom_query.append(item)
+        return recom_query
+
+
 if __name__ == '__main__':
     query = Query()
-    print(query.query("测试", 1, 10))
+    # print(query.query("测试", 1, 10))
+    print(query.get_recommend_query("测试"))
