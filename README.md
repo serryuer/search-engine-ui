@@ -1,5 +1,5 @@
 
-## Problems Set
+## Problem Set
 
 | Problem | Status|
 |---|---|
