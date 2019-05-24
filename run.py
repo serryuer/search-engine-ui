@@ -57,7 +57,7 @@ def search():
     elif query_term:
         # query search engine
 
-        data = query_engine.query_page(
+        data, time  = query_engine.query_page(
             query_term, page_num, page_len, sort_type)
 
         recom_search = query_engine.get_recommend_query(query_term)
@@ -70,7 +70,7 @@ def search():
         # show the list of matching results
         return render_template('spatial/index.html', query=query_term,
                                # response_time=r.elapsed.total_seconds(),
-                               response_time=0.1,
+                               response_time=time,
                                total=data["total"],
                                page_len=page_len,
                                page_num=page_num,
@@ -80,7 +80,7 @@ def search():
                                recommends=recom_search,
                                sort_type=sort_type)
     else:  # retrun home page with hot news
-        data = query_engine.recommend_news()
+        data = query_engine.recommend_news(['华为', '美国'])
 
         # show the list of matching results
         return render_template('spatial/index.html',

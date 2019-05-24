@@ -1,0 +1,45 @@
+ * Serving Flask app "run" (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: on
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 256-995-923
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+127.0.0.1 - - [22/May/2019 21:46:33] "[1m[35mGET / HTTP/1.1[0m" 500 -
+Traceback (most recent call last):
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 2309, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 2295, in wsgi_app
+    response = self.handle_exception(e)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 1741, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "D:\ProgramData\Anaconda3\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "E:\Document\UCAS\spring-semeters\Information Retrieval\Assignment\final project\ir\web-search-engine-ui\run.py", line 83, in search
+    data = query_engine.recommend_news()
+TypeError: recommend_news() missing 1 required positional argument: 'keywords'
+127.0.0.1 - - [22/May/2019 21:46:33] "[37mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 200 -
+127.0.0.1 - - [22/May/2019 21:46:33] "[37mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 200 -
+127.0.0.1 - - [22/May/2019 21:46:33] "[37mGET /?__debugger__=yes&cmd=resource&f=jquery.js HTTP/1.1[0m" 200 -
+127.0.0.1 - - [22/May/2019 21:46:33] "[37mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 200 -
+127.0.0.1 - - [22/May/2019 21:46:33] "[37mGET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1[0m" 200 -
+127.0.0.1 - - [22/May/2019 21:46:33] "[37mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 200 -
+ * Detected change in 'E:\\Document\\UCAS\\spring-semeters\\Information Retrieval\\Assignment\\final project\\ir\\web-search-engine-ui\\run.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 256-995-923
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)

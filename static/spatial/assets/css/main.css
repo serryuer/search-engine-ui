@@ -1959,7 +1959,6 @@ button.special:active,
     margin: 0 auto;
     width: 50em;
     background-color: rgba(255, 255, 255, 0.9);
-    height: 50em;
     overflow: auto;
 }
 

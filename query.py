@@ -14,7 +14,6 @@ from whoosh.searching import ResultsPage
 from whoosh.qparser import WildcardPlugin, PrefixPlugin, RegexPlugin
 
 
-
 class Query(object):
 
     def __init__(self):
@@ -29,44 +28,48 @@ class Query(object):
         self.qp.add_plugin(PrefixPlugin())
         self.qp.add_plugin(RegexPlugin())
 
+    ## 将search返回的结果解析成json格式，用于前端展示
     def _results_todata(self, results):
-            data = {}
-            if isinstance(results, Results):
-                data["total"] = results.estimated_length()
-            elif isinstance(results, ResultsPage):
-                data['total'] = results.total
-            result_list = []
-            for result in results:
-                item = {}
-                for key in result.keys():
-                    item[key] = result.get(key)
-                import re
-                match_class = re.compile('class="match term[0-9]"')
-                item['description'] = match_class.sub(" ", str(result.highlights('content')))\
-                    .replace(" ", "").replace("\r\n", "").replace("\n", "")
-                item['description'] = self.truncate_description(
-                    item['description'])
-                result_list.append(item)
-            data["results"] = result_list
-            return data
+        data = {}
+        if isinstance(results, Results):
+            data["total"] = results.estimated_length()
+        elif isinstance(results, ResultsPage):
+            data['total'] = results.total
+        result_list = []
+        for result in results:
+            item = {}
+            for key in result.keys():
+                item[key] = result.get(key)
+            import re
+            match_class = re.compile('class="match term[0-9]"')
+            item['description'] = match_class.sub(" ", str(result.highlights('content'))) \
+                .replace(" ", "").replace("\r\n", "").replace("\n", "")
+            item['description'] = self.truncate_description(
+                item['description'])
+            item['docnum'] = result.docnum
+            result_list.append(item)
+        data["results"] = result_list
+        return data
 
+    ## 搜索功能，每次搜索一页
     def query_page(self, term, page_num, page_len, sort_type):
 
         with self.ix.searcher() as searcher:
-            if sort_type == 1:# default sorted
+            if sort_type == 1:  # default sorted
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len)
-            if sort_type == 2:# sorted by publish time
+            if sort_type == 2:  # sorted by publish time
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            if sort_type == 3:# sorted by custom hot value
+            if sort_type == 3:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            
-            return self._results_todata(results)
 
+            return self._results_todata(results), results.results.runtime
+
+    ## 截断正文内容，避免过长
     def truncate_description(self, description):
         """
         Truncate description to fit in result format.
@@ -85,16 +88,55 @@ class Query(object):
         # print(cut_desc)
         return cut_desc
 
-    def recommend_news(self):
+    ## 根据关键词生成snippet
+    def generate_snippet_from_keyword(self, content, keywords):
+        content = content.replace(" ", "")
+        import re
+        sentences = re.split(r"[,|.|，|。|!|！|?|？]", content)
+        snippet = ""
+        count = 0
+        for sentence in sentences:
+            for keyword in keywords:
+                if sentence.find(keyword) > 0:
+                    # print(keyword, sentence)
+                    snippet = snippet + "," + sentence
+                    keywords.remove(keyword)
+                    break
+            if len(keywords) == 0:
+                return snippet[1:] + "。"
+        return snippet[1:] + "。"
+
+    ## 根据关键词生成推荐新闻，并生成摘要
+    def recommend_news(self, keywords):
+        data = {}
+        total = 0
+        result_list = []
+        data["results"] = result_list
         with self.ix.searcher() as searcher:
-            results = searcher.search(self.qp.parse(u"推荐"), limit=None)
-            return self._results_todata(results)
+            for keyword in keywords:
+                results = searcher.search(self.qp.parse(keyword), limit=1)
+                # keywords = [keyword for keyword, score
+                #             in results.key_terms("content", docs=10, numterms=5)]
+                # print(keywords)
+                item = {}
+                for result in results:
+                    total = total + 1
+                    for key in result.keys():
+                        item[key] = result.get(key)
+                    item["keywords"] = [keyword[0] for keyword in searcher.key_terms([result.docnum], "content")]
+                    item["snippet"] = self.generate_snippet_from_keyword(item['content'], item['keywords'])
+                    print(item['snippet'])
+                    result_list.append(item)
+                    break
+            data['total'] = total
+            data['results'] = result_list
+            return data
 
     def get_recommend_query(self, term):
         recom_query = []
         with self.ix.searcher() as searcher:
             results = searcher.search_page(
-                self.qp.parse(u"推荐"), pagenum=1, pagelen=10)
+                self.qp.parse(u"中国"), pagenum=1, pagelen=10)
             for result in results:
                 item = {}
                 item['term'] = result['title']
@@ -105,11 +147,10 @@ class Query(object):
         with self.ix.searcher() as searcher:
             docnum = searcher.document_number(url=url)
             results = searcher.more_like(docnum, fieldname, text=None,
-                                top=top, numterms=5, model=Bo1Model,
-                                normalize=True, filter=None)
+                                         top=top, numterms=5, model=Bo1Model,
+                                         normalize=True, filter=None)
 
             return self._results_todata(results)
-
 
 
 if __name__ == '__main__':
@@ -118,5 +159,5 @@ if __name__ == '__main__':
     # print(query.query_page(u"测试", 1, 10, 1))
 
     # query.query_page("测试",1,10, 1)
-    query.recommend_news()
-    # query.get_recommend_query("测试")
+    # print(query.recommend_news())
+    (query.recommend_news(["测试", '中国']))
