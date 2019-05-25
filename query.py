@@ -155,14 +155,14 @@ class Query(object):
         searchitem = ''
         word = ''
         reader = self.ix2.reader()
-        sentences = list(reader.field_terms('content'))
+        sentences = list(reader.field_terms('title'))
         for sentence in sentences:
-            words = re.split(r"0xffff",sentence)
-            for word in words:
-                searchitem = searchitem + word + ' '
-            searchitem = searchitem.strip()
-            keywords.append(searchitem)
-            searchitem = ''
+            # words = re.split(r"0xffff",sentence)
+            # for word in words:
+            #     searchitem = searchitem + word + ' '
+            # searchitem = searchitem.strip()
+            keywords.append(sentence)
+            # searchitem = ''
         print(keywords)
         return keywords
     ## 根据关键词生成推荐新闻，并生成摘要
