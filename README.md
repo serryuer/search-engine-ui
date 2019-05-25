@@ -1,6 +1,5 @@
 
 ## Problem Set
-* May 25
 | Problem | Status |
 | :-----: | ------ |
 |爬虫 | 于军帅、姜钰宝|
