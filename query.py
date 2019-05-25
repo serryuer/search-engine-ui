@@ -136,7 +136,7 @@ class Query(object):
                 # print(keywords)
                 item = {}
                 for result in results:
-                    total = total + 1
+                    total = total + 1   
                     for key in result.keys():
                         item[key] = result.get(key)
                     item["keywords"] = [keyword[0] for keyword in searcher.key_terms([result.docnum], "content")]
