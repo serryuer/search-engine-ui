@@ -163,6 +163,7 @@ class Query(object):
             searchitem = searchitem.strip()
             keywords.append(searchitem)
             searchitem = ''
+        print(keywords)
         return keywords
     ## 根据关键词生成推荐新闻，并生成摘要
     def recommend_news(self):
@@ -173,7 +174,8 @@ class Query(object):
         data["results"] = result_list
         with self.ix.searcher() as searcher:
             for keyword in keywords:
-                results = searcher.search(self.qp.parse(keyword), limit=1)
+                publish_time = FieldFacet("publish_time", reverse=True)
+                results = searcher.search(self.qp.parse(keyword), limit=1, sortedby=publish_time)
                 # keywords = [keyword for keyword, score
                 #             in results.key_terms("content", docs=10, numterms=5)]
                 # print(keywords)
