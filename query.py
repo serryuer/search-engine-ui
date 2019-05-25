@@ -2,7 +2,7 @@ from whoosh import index
 from whoosh.qparser import QueryParser
 from whoosh.qparser.dateparse import DateParserPlugin
 
-from whoosh.sorting import FieldFacet
+from whoosh.sorting import FieldFacet, ScoreFacet
 
 from config import config
 
@@ -12,6 +12,8 @@ from whoosh.searching import Results
 from whoosh.searching import ResultsPage
 
 from whoosh.qparser import WildcardPlugin, PrefixPlugin, RegexPlugin
+
+from whoosh.sorting import  ScoreAndTimeFacet
 
 
 class Query(object):
@@ -27,6 +29,48 @@ class Query(object):
         self.qp.add_plugin(WildcardPlugin())
         self.qp.add_plugin(PrefixPlugin())
         self.qp.add_plugin(RegexPlugin())
+
+    def _results_tohotdata(self, results):
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        daySeconds = 86400
+        weekSeconds = daySeconds * 7
+        monthSecond = weekSeconds * 30
+        data = {}
+        if isinstance(results, Results):
+            data["total"] = results.estimated_length()
+        elif isinstance(results, ResultsPage):
+            data['total'] = results.total
+        result_list = []
+        i = 0
+        for result in results:
+            i = i + 1
+            item = {}
+            for key in result.keys():
+                item[key] = result.get(key)
+            timespan = (now - item['publish_time']).seconds
+            if timespan > daySeconds:
+                if timespan < weekSeconds:
+                    item['hotScore'] = result.score * 1
+                else:
+                    item['hotScore'] = result.score * 0.5
+            else:
+                item['hotScore'] = result.score * 1.5
+            import re
+            match_class = re.compile('class="match term[0-9]"')
+            item['description'] = match_class.sub(" ", str(result.highlights('content'))) \
+                .replace(" ", "").replace("\r\n", "").replace("\n", "")
+            item['description'] = self.truncate_description(
+                item['description'])
+            item['docnum'] = result.docnum
+            result_list.append(item)
+            if i == 100:
+                result_list = sorted(result_list, key=lambda results: results['hotScore'])
+        if i < 100:
+            result_list = sorted(result_list, key=lambda results: results['hotScore'])
+        data["results"] = result_list
+        return data
+
 
     ## 将search返回的结果解析成json格式，用于前端展示
     def _results_todata(self, results):
@@ -57,15 +101,15 @@ class Query(object):
         with self.ix.searcher() as searcher:
             if sort_type == 1:  # default sorted
                 results = searcher.search_page(self.qp.parse(
-                    term), pagenum=page_num, pagelen=page_len)
-            if sort_type == 2:  # sorted by publish time
-                publish_time = FieldFacet("publish_time", reverse=True)
+                    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreFacet())
+            if sort_type == 3:  # sorted by publish time
+                publish_time = FieldFacet("publish_time", reverse=False)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            if sort_type == 3:  # sorted by custom hot value
+            if sort_type == 2:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
-                    term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
+                    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
 
             return self._results_todata(results), results.results.runtime
 
@@ -168,6 +212,12 @@ class Query(object):
 
             return self._results_todata(results)
 
+    def search_test(self):
+        with self.ix.searcher() as searcher:
+            results = searcher.search(
+                self.qp.parse(u"中国"), sortedby=ScoreFacet())
+            print(results)
+
 
 if __name__ == '__main__':
     query = Query()
@@ -176,4 +226,4 @@ if __name__ == '__main__':
 
     # query.query_page("测试",1,10, 1)
     # print(query.recommend_news())
-    query.recommend_news()
+    query.search_test()

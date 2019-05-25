@@ -43,3 +43,15 @@ TypeError: recommend_news() missing 1 required positional argument: 'keywords'
  * Debugger is active!
  * Debugger PIN: 256-995-923
  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+Traceback (most recent call last):
+  File "run.py", line 14, in <module>
+    query_engine = Query()
+  File "E:\Document\UCAS\spring-semeters\Information Retrieval\Assignment\final project\ir\web-search-engine-ui\query.py", line 20, in __init__
+    self.ix = index.open_dir(config.index_file_path)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\whoosh\index.py", line 123, in open_dir
+    return FileIndex(storage, schema=schema, indexname=indexname)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\whoosh\index.py", line 421, in __init__
+    TOC.read(self.storage, self.indexname, schema=self._schema)
+  File "D:\ProgramData\Anaconda3\lib\site-packages\whoosh\index.py", line 619, in read
+    % (indexname, storage))
+whoosh.index.EmptyIndexError: Index 'MAIN' does not exist in FileStorage('/Users/zhezhouli/postGraduate/InformationRetrieve/IR_system/news-crawler-python/news/index_files')
