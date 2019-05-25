@@ -80,7 +80,8 @@ def search():
                                recommends=recom_search,
                                sort_type=sort_type)
     else:  # retrun home page with hot news
-        data = query_engine.recommend_news(['华为', '美国'])
+        
+        data = query_engine.recommend_news()
 
         # show the list of matching results
         return render_template('spatial/index.html',

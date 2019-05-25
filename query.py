@@ -18,7 +18,7 @@ class Query(object):
 
     def __init__(self):
         self.ix = index.open_dir(config.index_file_path)
-
+        self.ix2 = index.open_dir(config.index2_file_path)
         # Instatiate a query parser
         self.qp = QueryParser("content", self.ix.schema)
 
@@ -106,11 +106,27 @@ class Query(object):
                 return snippet[1:] + "。"
         return snippet[1:] + "。"
 
+    def get_hot_words(self):
+        import re
+        keywords = []
+        searchitem = ''
+        word = ''
+        reader = self.ix2.reader()
+        sentences = list(reader.field_terms('content'))
+        for sentence in sentences:
+            words = re.split(r"0xffff",sentence)
+            for word in words:
+                searchitem = searchitem + word + ' '
+            searchitem = searchitem.strip()
+            keywords.append(searchitem)
+            searchitem = ''
+        return keywords
     ## 根据关键词生成推荐新闻，并生成摘要
-    def recommend_news(self, keywords):
+    def recommend_news(self):
         data = {}
         total = 0
         result_list = []
+        keywords = self.get_hot_words()
         data["results"] = result_list
         with self.ix.searcher() as searcher:
             for keyword in keywords:
@@ -160,4 +176,4 @@ if __name__ == '__main__':
 
     # query.query_page("测试",1,10, 1)
     # print(query.recommend_news())
-    (query.recommend_news(["测试", '中国']))
+    query.recommend_news()
