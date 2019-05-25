@@ -103,11 +103,10 @@ class Query(object):
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=ScoreFacet())
             if sort_type == 3:  # sorted by publish time
-                publish_time = FieldFacet("publish_time", reverse=False)
+                publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
             if sort_type == 2:  # sorted by custom hot value
-                publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
 
@@ -185,7 +184,7 @@ class Query(object):
                         item[key] = result.get(key)
                     item["keywords"] = [keyword[0] for keyword in searcher.key_terms([result.docnum], "content")]
                     item["snippet"] = self.generate_snippet_from_keyword(item['content'], item['keywords'])
-                    print(item['snippet'])
+                    # print(item['snippet'])
                     result_list.append(item)
                     break
             data['total'] = total
