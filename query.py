@@ -10,10 +10,12 @@ from whoosh.classify import Bo1Model
 
 from whoosh.searching import Results
 from whoosh.searching import ResultsPage
-
+from whoosh import sorting
 from whoosh.qparser import WildcardPlugin, PrefixPlugin, RegexPlugin
-
-
+from whoosh import scoring
+from string import digits
+from whoosh.sorting import ScoreAndTimeFacet, ScoreFacet
+import jieba
 class Query(object):
 
     def __init__(self):
@@ -51,22 +53,65 @@ class Query(object):
         data["results"] = result_list
         return data
 
+    def _results_tohotdata(self, results):
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        daySeconds = 86400
+        weekSeconds = daySeconds * 7
+        monthSecond = weekSeconds * 30
+        data = {}
+        if isinstance(results, Results):
+            data["total"] = results.estimated_length()
+        elif isinstance(results, ResultsPage):
+            data['total'] = results.total
+        result_list = []
+        i = 0
+        for result in results:
+            i = i + 1
+            item = {}
+            for key in result.keys():
+                item[key] = result.get(key)
+            timespan = (now - item['publish_time']).seconds
+            if timespan > daySeconds:
+                if timespan < weekSeconds:
+                    item['hotScore'] = result.score * 1
+                else:
+                    item['hotScore'] = result.score * 0.5
+            else:
+                item['hotScore'] = result.score * 1.5
+            import re
+            match_class = re.compile('class="match term[0-9]"')
+            item['description'] = match_class.sub(" ", str(result.highlights('content'))) \
+                .replace(" ", "").replace("\r\n", "").replace("\n", "")
+            item['description'] = self.truncate_description(
+                item['description'])
+            item['docnum'] = result.docnum
+            result_list.append(item)
+            if i == 100:
+                result_list = sorted(result_list, key=lambda results: results['hotScore'])
+        if i < 100:
+            result_list = sorted(result_list, key=lambda results: results['hotScore'])
+        data["results"] = result_list
+        return data
+
     ## 搜索功能，每次搜索一页
     def query_page(self, term, page_num, page_len, sort_type):
 
         with self.ix.searcher() as searcher:
             if sort_type == 1:  # default sorted
                 results = searcher.search_page(self.qp.parse(
-                    term), pagenum=page_num, pagelen=page_len)
-            if sort_type == 2:  # sorted by publish time
+                    term), pagenum=page_num, pagelen=page_len,sortedby=ScoreFacet())
+                results2 = searcher.search_page(self.qp.parse(
+                    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
+                self.generate_similarQuery(results,term)
+            if sort_type == 2:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            if sort_type == 3:  # sorted by custom hot value
+            if sort_type == 3:  # sorted by time
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
-                    term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-
+                    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
             return self._results_todata(results), results.results.runtime
 
     ## 截断正文内容，避免过长
@@ -87,6 +132,89 @@ class Query(object):
         cut_desc += letter
         # print(cut_desc)
         return cut_desc
+
+    # 计算句子的TF-IDF
+    def cal_TF_IDF(self,sentence):
+        with self.ix.searcher(weighting=scoring.TF_IDF()) as searcher_tfidf:
+            words = list(jieba.cut(sentence))
+            count = 0
+            score = 0
+            if len(words) > 8:
+                return 0
+            for word in words:
+                if word == u'的' or word == u'地' or word == u'和':
+                    continue 
+                count += 1
+                try:
+                    tf = searcher_tfidf.term_info('content', word).max_weight()
+                except:
+                    tf = 0.1
+                score += searcher_tfidf.idf('content',word) * tf
+            if count == 0:
+                return 0
+            else:
+                return score / count
+    
+    
+    
+    # 在20个句子中 选取5个包含关键词的较高TF-IDF句子
+    def generate_similarQuery(self, results, query_str):
+        word_count = 0 # 句子数量
+        keywords = []
+        items = []
+        similarQuery = []
+        for result in results:
+            content_count = 0
+            content = result.get('content')
+            content = content.replace(" ", ",") 
+            import re
+            keywords = re.split(" ", query_str)
+            sentences = re.split(r"[,|.|，|。|!|！|?|？|:|：|；|;|……|、]", content)
+            item = {}
+            for sentence in sentences:
+                notIn = 0
+                for keyword in keywords:
+                    if sentence.find(keyword) == -1:
+                        notIn = 1
+                        break
+                if notIn == 1:
+                    continue
+                pattern = re.compile(r'[^\u4e00-\u9fa5]')
+                #sentence = re.sub(pattern, '', sentence)
+
+                score = self.cal_TF_IDF(re.sub(pattern, '', sentence))
+                item['sentence'] = sentence
+                item['score'] = score
+                items.append(item)
+                word_count += 1
+                content_count += 1
+                if content_count > 5:   # 文章中有5个以上句子
+                    break
+                if word_count >= 30:    # 只挑选20个句子
+                    break
+            if word_count >= 30:
+                break
+        #items = list(set(items))
+        items.sort(key=lambda temp : temp['score'],reverse=True)
+
+        count = 0
+        
+        #SentenceFilter = ""
+        last_score = 0
+        for item in items:
+            if count >= 5:
+                continue
+            if last_score == item["score"]:
+                continue
+            similarQuery.append(item["sentence"])
+            count += 1
+            last_score = item['score']
+        return similarQuery
+
+
+
+
+
 
     ## 根据关键词生成snippet
     def generate_snippet_from_keyword(self, content, keywords):
@@ -172,7 +300,7 @@ class Query(object):
 if __name__ == '__main__':
     query = Query()
     # print(query.query("测试", 1, 10))
-    # print(query.query_page(u"测试", 1, 10, 1))
+    print(query.query_page(u"足球 教练", 1, 10, 1))
 
     # query.query_page("测试",1,10, 1)
     # print(query.recommend_news())
