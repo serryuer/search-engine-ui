@@ -103,7 +103,7 @@ class Query(object):
                     term), pagenum=page_num, pagelen=page_len,sortedby=ScoreFacet())
                 #results2 = searcher.search_page(self.qp.parse(
                 #    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
-                self.generate_similarQuery(results,term)
+                #self.generate_similarQuery(results,term)
             if sort_type == 2:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
@@ -154,14 +154,18 @@ class Query(object):
                 return countKey * score / count
     
     
-    
+    def sentenceFind(self,sentence,terms):
+        for term in terms:
+            if sentence.find(term) != -1 :
+                return 1
+        return 0
     # 在20个句子中 选取5个包含关键词的较高TF-IDF句子
     def generate_similarQuery(self, results, query_str):
         word_count = 0 # 句子数量
         keywords = []
         items = []
         similarQuery = []
-        for result in results[0:10]:
+        for result in results[0:9]:
             content_count = 0
             content = result.get('content')
             content = content.replace(" ", ",") 
@@ -172,7 +176,10 @@ class Query(object):
             for sentence in sentences:
                 countKey = 0
                 for keyword in keywords:
-                    if sentence.find(keyword) != -1:
+                    terms = jieba.cut(keyword)
+                    self.sentenceFind(sentence,terms)
+                    #if sentence.find(keyword) != -1:
+                    if self.sentenceFind(sentence,keyword) != 0:
                         countKey += 1
                         continue
                 if countKey == 0:
@@ -281,11 +288,17 @@ class Query(object):
         recom_query = []
         with self.ix.searcher() as searcher:
             results = searcher.search_page(
-                self.qp.parse(u"中国"), pagenum=1, pagelen=10)
-            for result in results:
+                self.qp.parse(term), pagenum=1, pagelen=10)
+            recommends = self.generate_similarQuery(results, term)
+            for recommend in recommends:
                 item = {}
-                item['term'] = result['title']
+                item['term']  = recommend
                 recom_query.append(item)
+            # for result in results:
+            #     #self.generate_similarQuery(results, term)
+            #     item = {}
+            #     item['term'] = result['title']
+            #     recom_query.append(item)
         return recom_query
 
     def search_more_like_this(self, url, fieldname, top):
