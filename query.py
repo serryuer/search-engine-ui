@@ -104,12 +104,11 @@ class Query(object):
                 #results2 = searcher.search_page(self.qp.parse(
                 #    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
                 #self.generate_similarQuery(results,term)
-            if sort_type == 2:  # sorted by custom hot value
+            if sort_type == 3:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            if sort_type == 3:  # sorted by time
-                publish_time = FieldFacet("publish_time", reverse=True)
+            if sort_type == 2:  # sorted by time
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
             return self._results_todata(results), results.results.runtime
