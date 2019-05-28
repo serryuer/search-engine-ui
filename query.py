@@ -104,11 +104,12 @@ class Query(object):
                 #results2 = searcher.search_page(self.qp.parse(
                 #    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
                 #self.generate_similarQuery(results,term)
-            if sort_type == 3:  # sorted by custom hot value
+            if sort_type == 2:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=publish_time)
-            if sort_type == 2:  # sorted by time
+            if sort_type == 3:  # sorted by time
+                publish_time = FieldFacet("publish_time", reverse=True)
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
             return self._results_todata(results), results.results.runtime
@@ -160,25 +161,34 @@ class Query(object):
         return 0
     # 在20个句子中 选取5个包含关键词的较高TF-IDF句子
     def generate_similarQuery(self, results, query_str):
+        import re
         word_count = 0 # 句子数量
         keywords = []
         items = []
         similarQuery = []
+        terms = []
+        keywords = re.split(" ", query_str)
+        for keyword in keywords:
+            temps = list(jieba.cut(keyword))
+            for temp in temps:
+                if len(temp) == 0 :
+                    continue
+                terms.append(temp)
         for result in results[0:9]:
             content_count = 0
             content = result.get('content')
-            content = content.replace(" ", ",") 
-            import re
-            keywords = re.split(" ", query_str)
+            content = content.replace(" ", ",")
             sentences = re.split(r"[,|.|，|。|!|！|?|？|:|：|；|;|……|、]", content)
-            item = {}
             for sentence in sentences:
+                item = {}
                 countKey = 0
-                for keyword in keywords:
-                    terms = jieba.cut(keyword)
-                    self.sentenceFind(sentence,terms)
+                #for keyword in keywords:
+                for term in terms:
+                    #terms = jieba.cut(keyword)
+                    #self.sentenceFind(sentence,terms)
                     #if sentence.find(keyword) != -1:
-                    if self.sentenceFind(sentence,keyword) != 0:
+                    #if self.sentenceFind(sentence,keyword) != 0:
+                    if sentence.find(term) != -1:
                         countKey += 1
                         continue
                 if countKey == 0:
@@ -195,7 +205,7 @@ class Query(object):
                 items.append(item)
                 word_count += 1
                 content_count += 1
-                if content_count > 5:   # 文章中有5个以上句子
+                if content_count > 2:   # 文章中有5个以上句子
                     break
                 if word_count >= 30:    # 只挑选20个句子
                     break
