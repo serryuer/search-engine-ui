@@ -134,16 +134,14 @@ class Query(object):
         return cut_desc
 
     # 计算句子的TF-IDF
-    def cal_TF_IDF(self,sentence):
+    def cal_TF_IDF(self,words,countKey):
         with self.ix.searcher(weighting=scoring.TF_IDF()) as searcher_tfidf:
-            words = list(jieba.cut(sentence))
+            #words = list(jieba.cut(sentence))
             count = 0
             score = 0
-            if len(words) > 8:
-                return 0
             for word in words:
-                if word == u'的' or word == u'地' or word == u'和':
-                    continue 
+                #if word == u'的' or word == u'地' or word == u'和':
+                #    continue
                 count += 1
                 try:
                     tf = searcher_tfidf.term_info('content', word).max_weight()
@@ -153,7 +151,7 @@ class Query(object):
             if count == 0:
                 return 0
             else:
-                return score / count
+                return countKey * score / count
     
     
     
@@ -163,7 +161,7 @@ class Query(object):
         keywords = []
         items = []
         similarQuery = []
-        for result in results:
+        for result in results[0:10]:
             content_count = 0
             content = result.get('content')
             content = content.replace(" ", ",") 
@@ -172,17 +170,20 @@ class Query(object):
             sentences = re.split(r"[,|.|，|。|!|！|?|？|:|：|；|;|……|、]", content)
             item = {}
             for sentence in sentences:
-                notIn = 0
+                countKey = 0
                 for keyword in keywords:
-                    if sentence.find(keyword) == -1:
-                        notIn = 1
-                        break
-                if notIn == 1:
+                    if sentence.find(keyword) != -1:
+                        countKey += 1
+                        continue
+                if countKey == 0:
                     continue
                 pattern = re.compile(r'[^\u4e00-\u9fa5]')
-                #sentence = re.sub(pattern, '', sentence)
-
-                score = self.cal_TF_IDF(re.sub(pattern, '', sentence))
+                sentence_cn = re.sub(pattern, '', sentence)
+                words = list(jieba.cut(sentence_cn))
+                if len(words) > 8 or len(words) < 3:
+                    continue
+                #score = self.cal_TF_IDF(re.sub(pattern, '', words))
+                score = self.cal_TF_IDF(words,countKey)
                 item['sentence'] = sentence
                 item['score'] = score
                 items.append(item)
@@ -300,7 +301,7 @@ class Query(object):
 if __name__ == '__main__':
     query = Query()
     # print(query.query("测试", 1, 10))
-    print(query.query_page(u"足球 教练", 1, 10, 1))
+    print(query.query_page(u"测试", 1, 10, 1))
 
     # query.query_page("测试",1,10, 1)
     # print(query.recommend_news())
