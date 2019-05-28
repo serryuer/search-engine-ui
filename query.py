@@ -161,7 +161,7 @@ class Query(object):
         keywords = []
         items = []
         similarQuery = []
-        for result in results[0:10]:
+        for result in results[0:9]:
             content_count = 0
             content = result.get('content')
             content = content.replace(" ", ",") 
