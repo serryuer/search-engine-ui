@@ -101,8 +101,8 @@ class Query(object):
             if sort_type == 1:  # default sorted
                 results = searcher.search_page(self.qp.parse(
                     term), pagenum=page_num, pagelen=page_len,sortedby=ScoreFacet())
-                results2 = searcher.search_page(self.qp.parse(
-                    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
+                #results2 = searcher.search_page(self.qp.parse(
+                #    term), pagenum=page_num, pagelen=page_len, sortedby=ScoreAndTimeFacet())
                 self.generate_similarQuery(results,term)
             if sort_type == 2:  # sorted by custom hot value
                 publish_time = FieldFacet("publish_time", reverse=True)
