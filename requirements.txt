@@ -53,7 +53,7 @@ virtualenv==16.5.0
 virtualenv-clone==0.5.3
 w3lib==1.20.0
 webencodings==0.5.1
-Werkzeug==0.15.2
+Werkzeug==0.15.3
 Whoosh==2.7.4
 wrapt==1.10.11
 zope.interface==4.6.0
